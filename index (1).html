@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07080d">
+<title>Tanveer Ahmad | Digital Picture Portfolio</title>
+<meta name="description" content="Six looks, one professional story. A visual portfolio by Tanveer Ahmad, aspiring Frontend Developer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+@property --accent{syntax:'<color>';inherits:true;initial-value:#7cf5c8}
+:root{--bg:#07080d;--card:#10121b;--line:rgba(255,255,255,.1);--text:#eef0f8;--muted:#8d93aa;--accent:#7cf5c8;transition:--accent .9s ease}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body:not(.ready){overflow:hidden}
+h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif}
+em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:var(--accent)}
+a,button{font:inherit;color:inherit}
+button{background:none;border:0}
+body.has-cursor,body.has-cursor *{cursor:none!important}
+
+/* ---------- LOADER ---------- */
+#loader{position:fixed;inset:0;background:#07080d;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#loader.done{transform:translateY(-100%);transition:transform 1.1s cubic-bezier(.77,0,.18,1)}
+.ld-name{font:700 clamp(1rem,2.4vw,1.4rem)/1 'Space Grotesk';letter-spacing:.5em;color:var(--muted);padding-left:.5em}
+.ld-count{font:700 clamp(5rem,18vw,12rem)/1 'Space Grotesk';color:var(--text)}
+.ld-bar{width:min(320px,60vw);height:2px;background:var(--line);overflow:hidden}
+.ld-bar i{display:block;height:100%;background:var(--accent);transform:scaleX(0);transform-origin:left}
+
+/* ---------- GLOBAL FX ---------- */
+#progress{position:fixed;top:0;left:0;height:3px;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--accent),#6c8cff);z-index:120}
+.glow{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(60vw 60vw at 80% 15%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 60%),
+             radial-gradient(50vw 50vw at 0% 100%,color-mix(in srgb,var(--accent) 9%,transparent),transparent 60%)}
+.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:2000;border-radius:50%;display:none}
+body.has-cursor .cursor-dot,body.has-cursor .cursor-ring{display:flex}
+.cursor-dot{width:8px;height:8px;margin:-4px 0 0 -4px;background:var(--accent)}
+.cursor-ring{width:38px;height:38px;margin:-19px 0 0 -19px;border:1px solid var(--accent);align-items:center;justify-content:center;
+  font:700 .62rem 'Space Grotesk';letter-spacing:1.5px;text-transform:uppercase;color:var(--bg);
+  transition:width .3s,height .3s,margin .3s,background .3s}
+.cursor-ring.big{width:66px;height:66px;margin:-33px 0 0 -33px;background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.cursor-ring.label{width:84px;height:84px;margin:-42px 0 0 -42px;background:var(--accent)}
+
+nav{position:fixed;top:0;width:100%;display:flex;justify-content:space-between;align-items:center;padding:16px 5vw;z-index:110;backdrop-filter:blur(14px);background:rgba(7,8,13,.55);border-bottom:1px solid transparent}
+nav .logo{font:700 1rem 'Space Grotesk';letter-spacing:1px}
+nav .logo span{color:var(--accent)}
+.btn{display:inline-block;text-decoration:none;font-size:.85rem;font-weight:500;color:var(--bg);background:var(--accent);padding:9px 18px;border-radius:999px;transition:transform .25s}
+
+.dots{position:fixed;right:22px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;z-index:100}
+.dots button{position:relative;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.22);transition:.3s}
+.dots button.on{background:var(--accent);transform:scale(1.6)}
+.dots button::before{content:attr(data-label);position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;color:var(--text);opacity:0;pointer-events:none;transition:.3s}
+.dots button:hover::before{opacity:1}
+.hud{position:fixed;left:5vw;bottom:26px;z-index:100;font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0;transform:translateY(10px);transition:.5s;display:flex;gap:10px;align-items:baseline}
+.hud.show{opacity:1;transform:none}
+.hud b{font:700 1.5rem 'Space Grotesk';color:var(--text);letter-spacing:0}
+.hud em{font-size:1rem;text-transform:none;letter-spacing:0}
+
+/* ---------- REVEAL SYSTEM ---------- */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .9s ease var(--d,0ms),transform 1s cubic-bezier(.2,.8,.2,1) var(--d,0ms)}
+.reveal.in{opacity:1;transform:none}
+.w{display:inline-block;overflow:hidden;vertical-align:bottom;padding:0 .06em .14em;margin:0 -.06em -.14em}
+.wi{display:inline-block;transform:translateY(112%);transition:transform 1.1s cubic-bezier(.2,.8,.2,1)}
+[data-split].in .wi{transform:none}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:130px 5vw 90px;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:80px 80px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 15%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 40%,#000 15%,transparent 70%);opacity:.5}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.45;background:color-mix(in srgb,var(--accent) 55%,transparent);animation:float 14s ease-in-out infinite;pointer-events:none}
+.b1{width:36vw;height:36vw;right:-6vw;top:4vh;translate:calc(var(--hx,0)*-60px) calc(var(--hy,0)*-60px)}
+.b2{width:26vw;height:26vw;left:-8vw;bottom:-6vh;background:color-mix(in srgb,#6c8cff 55%,transparent);animation-delay:-6s;translate:calc(var(--hx,0)*50px) calc(var(--hy,0)*50px)}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-40px) scale(1.1)}}
+.hero-in{position:relative;z-index:2;will-change:transform,opacity}
+.eyebrow{color:var(--accent);font-size:.82rem;letter-spacing:4px;text-transform:uppercase;margin-bottom:26px}
+.hero h1{font-size:clamp(3rem,10.5vw,9rem);line-height:.95;font-weight:700;letter-spacing:-.03em}
+.hero p.sub{margin-top:30px;max-width:58ch;color:var(--muted);font-size:clamp(1rem,1.5vw,1.2rem)}
+.role{margin-top:22px;font-size:clamp(1.1rem,2vw,1.6rem);color:var(--muted)}
+.role #role{color:var(--text);font-family:'Instrument Serif',serif;font-style:italic;font-size:1.3em}
+.caret{display:inline-block;width:2px;height:1em;background:var(--accent);margin-left:4px;vertical-align:-.12em;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
+.chip{border:1px solid var(--line);padding:7px 16px;border-radius:999px;font-size:.8rem;color:var(--muted);backdrop-filter:blur(6px)}
+.scroll-cue{position:absolute;bottom:28px;left:5vw;z-index:2;color:var(--muted);text-decoration:none;font-size:.78rem;letter-spacing:3px;text-transform:uppercase;display:flex;align-items:center;gap:14px}
+.scroll-cue i{display:block;width:1px;height:46px;background:var(--accent);animation:drop 1.8s infinite}
+@keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ---------- MARQUEE ---------- */
+.marquee{overflow:hidden;padding:34px 0;border-block:1px solid var(--line)}
+.marquee .track{display:flex;white-space:nowrap;width:max-content;will-change:transform;font:700 clamp(2.8rem,8vw,7rem)/1.1 'Space Grotesk';text-transform:uppercase}
+.marquee span{color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.35);padding:0 .3em}
+.marquee span.fill{color:var(--text);-webkit-text-stroke:0}
+.marquee i{color:var(--accent);font-style:normal;align-self:center;font-size:.5em}
+
+/* ---------- SHOTS ---------- */
+.shot{position:relative;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:center;padding:110px 5vw;overflow:hidden}
+.shot:nth-of-type(even) .frame-wrap{order:2}
+.num{position:absolute;top:50px;right:4vw;font:700 clamp(7rem,22vw,19rem)/1 'Space Grotesk';color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.1);pointer-events:none;will-change:transform;z-index:0}
+.shot:nth-of-type(even) .num{right:auto;left:4vw}
+.frame-wrap{position:relative;z-index:1;perspective:1100px;border-radius:26px;transition:box-shadow .6s}
+.frame-wrap:hover{box-shadow:0 40px 110px -30px color-mix(in srgb,var(--accent) 50%,transparent)}
+.frame{position:relative;overflow:hidden;border-radius:26px;aspect-ratio:4/5;background:var(--card);border:1px solid var(--line);
+  clip-path:inset(100% 0 0 0 round 26px);transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:clip-path 1.4s cubic-bezier(.77,0,.18,1),transform .35s ease-out}
+.frame.in{clip-path:inset(0 0 0 0 round 26px)}
+.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:translate3d(0,var(--py,0%),0) scale(1.12);will-change:transform}
+.frame::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.17),transparent 45%)}
+.frame:hover::after{opacity:1}
+.corner{position:absolute;left:16px;bottom:16px;z-index:2;padding:8px 14px;border-radius:999px;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;background:rgba(7,8,13,.55);backdrop-filter:blur(10px);border:1px solid var(--line)}
+.ph{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;color:var(--muted);
+  background:repeating-linear-gradient(45deg,#10121b,#10121b 14px,#141726 14px,#141726 28px)}
+.ph b{color:var(--accent);font-family:'Space Grotesk'}
+.frame.missing .ph{display:flex}
+.frame.missing img{display:none}
+.info{position:relative;z-index:1}
+.tag{display:inline-flex;align-items:center;gap:12px;color:var(--accent);font-size:.78rem;letter-spacing:3px;text-transform:uppercase}
+.tag::before{content:'';width:34px;height:1px;background:var(--accent)}
+.info h2{font-size:clamp(2.3rem,5.2vw,4.6rem);line-height:1.02;margin:14px 0 24px;letter-spacing:-.025em}
+.cap{font-size:clamp(1.02rem,1.4vw,1.2rem);color:#c3c8dc;max-width:46ch}
+.badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.badge{padding:9px 18px;border-radius:999px;font-size:.82rem;font-weight:500;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.badge.alt{color:var(--text);background:transparent;border-color:var(--line)}
+.shot.wide{grid-template-columns:1fr;gap:40px}
+.shot.wide .frame-wrap{order:0!important}
+.shot.wide .frame{aspect-ratio:1405/768}
+.shot.wide .info{display:grid;grid-template-columns:1fr 1fr;gap:2vw 6vw;align-items:start}
+.shot.wide .info .tag{grid-column:1/-1}
+.shot.wide .info h2{margin:0}
+.shot.wide .info .tail{padding-top:8px}
+
+/* ---------- OCEAN ---------- */
+.ocean{padding:120px 5vw;border-top:1px solid var(--line)}
+.ocean h2,.recap h2{font-size:clamp(2.2rem,6vw,5rem);line-height:1;margin:14px 0 18px;letter-spacing:-.025em}
+.ocean .lead,.recap .lead{color:var(--muted);max-width:60ch}
+.oc-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:5vw;align-items:center;margin-top:56px}
+.radar svg{width:100%;height:auto;overflow:visible}
+.radar .grid{fill:none;stroke:rgba(255,255,255,.12)}
+.radar .axis{stroke:rgba(255,255,255,.12)}
+.radar text{fill:var(--muted);font:500 13px 'Inter',sans-serif}
+.radar .poly{transform:scale(0);transform-origin:280px 210px;transition:transform 1.5s cubic-bezier(.2,.8,.2,1) .2s}
+.radar.in .poly{transform:scale(1)}
+.radar .poly polygon{fill:color-mix(in srgb,var(--accent) 22%,transparent);stroke:var(--accent);stroke-width:2;stroke-linejoin:round}
+.radar .poly circle{fill:var(--accent)}
+.trait{display:block;text-decoration:none;padding:18px 22px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.02);margin-bottom:14px;transition:border-color .3s,background .3s,transform .3s}
+.trait:hover{border-color:var(--accent);background:rgba(255,255,255,.045);transform:translateX(8px)}
+.t-top{display:flex;justify-content:space-between;align-items:baseline}
+.t-top h3{font-size:1.1rem}
+.pct{font:700 1.4rem 'Space Grotesk';color:var(--accent)}
+.trait p{color:var(--muted);font-size:.9rem;margin:4px 0 14px}
+.track2{height:5px;background:var(--line);border-radius:5px;overflow:hidden}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#6c8cff);border-radius:5px;transition:width 1.6s cubic-bezier(.2,.8,.2,1) .3s}
+.trait small{display:block;margin-top:12px;color:var(--text);font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;opacity:.7}
+
+/* ---------- RECAP ---------- */
+.recap{padding:100px 5vw;border-top:1px solid var(--line)}
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.thumb{position:relative;aspect-ratio:4/3;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--card);padding:0;display:block;width:100%}
+.thumb img{width:100%;height:100%;object-fit:cover;object-position:50% 25%;filter:grayscale(.7) brightness(.75);transition:transform .9s cubic-bezier(.2,.8,.2,1),filter .5s}
+.thumb:hover{transform:translateY(-8px)}
+.thumb:hover img{transform:scale(1.08);filter:none}
+.thumb span{position:absolute;left:16px;top:10px;font:700 1.5rem 'Space Grotesk';text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.thumb.missing img{display:none}
+
+/* ---------- FOOTER ---------- */
+footer{padding:130px 5vw 50px;border-top:1px solid var(--line);text-align:center;position:relative;overflow:hidden}
+footer h2{font-size:clamp(2.4rem,8vw,7rem);line-height:1;max-width:14ch;margin:16px auto 40px;letter-spacing:-.03em}
+.links{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;margin-bottom:60px}
+.links a,.top{display:inline-block;padding:15px 30px;border-radius:999px;text-decoration:none;font-weight:500;border:1px solid var(--line);transition:transform .25s,border-color .3s,background .3s}
+.links a.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.links a:hover,.top:hover{border-color:var(--accent)}
+.note{color:var(--muted);font-size:.82rem;max-width:68ch;margin:0 auto 34px}
+.top{font-size:.85rem;color:var(--muted)}
+.copy{margin-top:40px;font-size:.75rem;color:var(--muted);letter-spacing:2px}
+
+/* ---------- LIGHTBOX ---------- */
+#lb{position:fixed;inset:0;z-index:1500;background:rgba(5,6,10,.94);display:none;align-items:center;justify-content:center;padding:5vw;backdrop-filter:blur(8px)}
+#lb.on{display:flex;animation:fadeIn .35s}
+@keyframes fadeIn{from{opacity:0}}
+#lb img{max-width:100%;max-height:100%;border-radius:18px;box-shadow:0 30px 120px rgba(0,0,0,.6)}
+.lb-btn{position:absolute;width:52px;height:52px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:rgba(255,255,255,.05);transition:.25s}
+.lb-btn:hover{border-color:var(--accent);color:var(--accent)}
+#lbPrev{left:22px;top:50%;margin-top:-26px}
+#lbNext{right:22px;top:50%;margin-top:-26px}
+#lbClose{right:22px;top:22px}
+#lbCount{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-size:.8rem;letter-spacing:3px;color:var(--muted)}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:860px){
+  .dots,.hud{display:none}
+  .shot{grid-template-columns:1fr;gap:34px;padding:90px 6vw}
+  .shot:nth-of-type(even) .frame-wrap{order:0}
+  .num{top:60px;font-size:8rem}
+  .shot:nth-of-type(even) .num{left:auto;right:4vw}
+  .shot.wide .info{grid-template-columns:1fr}
+  .oc-grid{grid-template-columns:1fr}
+  .rgrid{grid-template-columns:repeat(2,1fr)}
+  .scroll-cue{display:none}
+  .hero{padding-top:110px}
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.wi{transition:none!important;opacity:1!important;transform:none!important}
+  .frame{clip-path:none!important;transition:none}
+  .blob,.caret,.scroll-cue i{animation:none}
+}
+@media print{
+  #loader,.cursor-dot,.cursor-ring,.dots,.hud,nav,.grain,#progress{display:none!important}
+  .reveal,.wi,.radar .poly{opacity:1!important;transform:none!important}
+  .frame{clip-path:none!important}
+  .fill{width:var(--w)!important}
+  body{overflow:visible!important}
+}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="ld-name">TANVEER AHMAD</div><div class="ld-count" id="ldCount">0</div><div class="ld-bar"><i id="ldBar"></i></div></div>
+<div id="progress"></div>
+<div class="glow"></div>
+<div class="grain"></div>
+<div class="cursor-dot"></div><div class="cursor-ring"></div>
+
+<nav>
+  <div class="logo">TANVEER<span>.</span>AHMAD</div>
+  <a class="btn mag" href="https://github.com/TVA7669/" target="_blank" rel="noopener">GitHub ↗</a>
+</nav>
+<div class="dots" id="dots"></div>
+<div class="hud" id="hud"><b id="hudNum">01</b><span>/ 06</span><em id="hudTrait"></em></div>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="hero" data-theme="#7cf5c8" data-label="Intro">
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <div class="hero-in" id="heroContent">
+    <div class="eyebrow reveal" data-hero style="--d:100ms">Digital Picture Portfolio · Mid-Term Project</div>
+    <h1 data-split data-hero>Six looks.<br>One <em>professional</em> story.</h1>
+    <p class="sub reveal" data-hero style="--d:700ms">I'm Tanveer Ahmad, a Computer Science student and aspiring Frontend Developer. Every outfit below shows a different side of how I work, and the personality trait that powers it.</p>
+    <p class="role reveal" data-hero style="--d:850ms">I'm a <span id="role"></span><span class="caret"></span></p>
+    <div class="chips reveal" data-hero style="--d:1000ms">
+      <span class="chip">Frontend Developer</span><span class="chip">React · MERN</span><span class="chip">BS Computer Science 2025–2029</span><span class="chip">Lahore, Pakistan</span>
+    </div>
+  </div>
+  <a class="scroll-cue" href="#s1"><i></i> Scroll to explore my story</a>
+</header>
+
+<div class="marquee" data-dir="1" data-words="sk" aria-hidden="true"><div class="track"></div></div>
+
+<!-- ================= SHOTS ================= -->
+<main>
+<section class="shot" id="s1" data-theme="#7cf5c8" data-label="Formal" data-idx="01" data-trait="Conscientiousness">
+  <div class="num" data-speed="-0.12">01</div>
+  <div class="frame-wrap"><div class="frame" data-src="1st%20pic.jfif" data-cursor="View">
+    <img src="1st%20pic.jfif" alt="Tanveer in business formal attire"><div class="ph"><b>Image 1</b>File not found:<br>1st pic</div><span class="corner">Business Formal</span></div></div>
+  <div class="info">
+    <span class="tag reveal">01 — Business Formal</span>
+    <h2 data-split>Prepared before I <em>walk in</em>.</h2>
+    <p class="cap reveal" style="--d:200ms">Formal attire shows I respect every opportunity and arrive ready. It reflects my Conscientiousness: I plan carefully, pay attention to detail, and keep every commitment I make.</p>
+    <div class="badges reveal" style="--d:350ms"><span class="badge">Conscientiousness</span><span class="badge alt">Reliability</span></div>
+  </div>
+</section>
+
+<section class="shot" id="s2" data-theme="#6c8cff" data-label="Skills" data-idx="02" data-trait="Agreeableness">
+  <div class="num" data-speed="-0.12">02</div>
+  <div class="frame-wrap"><div class="frame" data-src="2nd%20picsss.jpg" data-cursor="View">
+    <img src="2nd%20picsss.jpg" alt="Tanveer in business casual attire working on a laptop"><div class="ph"><b>Image 2</b>File not found:<br>2nd picsss</div><span class="corner">Skills in Action</span></div></div>
+  <div class="info">
+    <span class="tag reveal">02 — Skills in Action · Business Casual</span>
+    <h2 data-split>Approachable, and <em>getting things done</em>.</h2>
+    <p class="cap reveal" style="--d:200ms">Smart business casual shows I am professional without being distant. It reflects my Agreeableness and teamwork skills, because good products are built by people who listen and collaborate.</p>
+    <div class="badges reveal" style="--d:350ms"><span class="badge">Agreeableness</span><span class="badge alt">Teamwork</span></div>
+  </div>
+</section>
+
+<section class="shot" id="s3" data-theme="#c084fc" data-label="Developer" data-idx="03" data-trait="Openness">
+  <div class="num" data-speed="-0.12">03</div>
+  <div class="frame-wrap"><div class="frame" data-src="3rd%20pic.jfif" data-cursor="View">
+    <img src="3rd%20pic.jfif" alt="Tanveer in field-specific tech attire holding a tablet"><div class="ph"><b>Image 3</b>File not found:<br>3rd pic</div><span class="corner">Developer Mode</span></div></div>
+  <div class="info">
+    <span class="tag reveal">03 — Field-Specific · Developer Mode</span>
+    <h2 data-split>Where ideas become <em>code</em>.</h2>
+    <p class="cap reveal" style="--d:200ms">My tech workplace look is my everyday uniform as a developer. It connects to my Openness: I keep exploring new tools like React, Node and MongoDB, and I enjoy learning by building real projects.</p>
+    <div class="badges reveal" style="--d:350ms"><span class="badge">Openness</span><span class="badge alt">React · MERN</span></div>
+  </div>
+</section>
+
+<section class="shot" id="s4" data-theme="#ff7ab6" data-label="Creative" data-idx="04" data-trait="Openness · Design">
+  <div class="num" data-speed="-0.12">04</div>
+  <div class="frame-wrap"><div class="frame" data-src="4th%20pic.jfif" data-cursor="View">
+    <img src="4th%20pic.jfif" alt="Tanveer in creative tech attire with wireframes behind him"><div class="ph"><b>Image 4</b>File not found:<br>4th pic</div><span class="corner">Creative / Tech</span></div></div>
+  <div class="info">
+    <span class="tag reveal">04 — Creative / Tech Attire</span>
+    <h2 data-split>Freelancer energy, <em>designer eye</em>.</h2>
+    <p class="cap reveal" style="--d:200ms">A relaxed, modern look shows I fit into creative teams and agency-style work. It connects to my UI design skills and my Openness to fresh ideas, since I like turning plain layouts into memorable interfaces.</p>
+    <div class="badges reveal" style="--d:350ms"><span class="badge">Openness</span><span class="badge alt">UI Design · Freelancing</span></div>
+  </div>
+</section>
+
+<section class="shot wide" id="s5" data-theme="#ffc857" data-label="Remote" data-idx="05" data-trait="Emotional Stability">
+  <div class="num" data-speed="-0.12">05</div>
+  <div class="frame-wrap"><div class="frame" data-src="5th%20s.jfif" data-cursor="View">
+    <img src="5th%20s.jfif" alt="Tanveer in remote work attire on a video call"><div class="ph"><b>Image 5</b>File not found:<br>5th s</div><span class="corner">Remote Work</span></div></div>
+  <div class="info">
+    <span class="tag reveal">05 — Remote Work Attire</span>
+    <h2 data-split>Ready for <em>any time zone</em>.</h2>
+    <div class="tail">
+      <p class="cap reveal" style="--d:200ms">Presentable from the waist up and comfortable enough to focus, this look shows I am ready for international remote roles. It reflects my emotional stability: I stay calm, organised and self-driven without a manager next to me.</p>
+      <div class="badges reveal" style="--d:350ms"><span class="badge">Emotional Stability</span><span class="badge alt">Remote Ready</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="shot wide" id="s6" data-theme="#5ce1ff" data-label="Team" data-idx="06" data-trait="Extraversion">
+  <div class="num" data-speed="-0.12">06</div>
+  <div class="frame-wrap"><div class="frame" data-src="6h%20pic.jfif" data-cursor="View">
+    <img src="6h%20pic.jfif" alt="Tanveer in a team meeting in business attire"><div class="ph"><b>Image 6</b>File not found:<br>6h pic</div><span class="corner">Team / Networking</span></div></div>
+  <div class="info">
+    <span class="tag reveal">06 — Team / Networking Attire</span>
+    <h2 data-split>Confident in <em>every room</em>.</h2>
+    <div class="tail">
+      <p class="cap reveal" style="--d:200ms">A coordinated navy suit in a team meeting shows I can hold my own while respecting other voices. It reflects my Extraversion: I enjoy explaining ideas, sharing projects and connecting with people.</p>
+      <div class="badges reveal" style="--d:350ms"><span class="badge">Extraversion</span><span class="badge alt">Communication · Teamwork</span></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="marquee" data-dir="-1" data-words="oc" aria-hidden="true"><div class="track"></div></div>
+
+<!-- ================= OCEAN ================= -->
+<section class="ocean" id="ocean" data-theme="#7cf5c8" data-label="OCEAN">
+  <span class="tag reveal">The Big Five</span>
+  <h2 data-split>My <em>OCEAN</em>, at a glance.</h2>
+  <p class="lead reveal">Each outfit above maps to a Big Five personality trait. Together they describe how I work, learn and collaborate. Tap a trait to jump back to its picture.</p>
+  <div class="oc-grid">
+    <div class="radar" id="radar"></div>
+    <div id="traits"></div>
+  </div>
+</section>
+
+<!-- ================= RECAP ================= -->
+<section class="recap" id="recap">
+  <span class="tag reveal">The full story</span>
+  <h2 data-split>Six looks, <em>one glance</em>.</h2>
+  <p class="lead reveal">Tap any picture to view it full screen.</p>
+  <div class="rgrid" id="recapGrid"></div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer id="contact" data-theme="#7cf5c8" data-label="Contact">
+  <span class="tag reveal">What's next</span>
+  <h2 data-split>Let's build something <em>great</em> together.</h2>
+  <div class="links reveal">
+    <a class="primary mag" data-cursor="Go" href="https://github.com/TVA7669" target="_blank" rel="noopener">View my GitHub ↗</a>
+    <!-- TODO: replace with your real LinkedIn profile URL -->
+    <a class="mag" data-cursor="Go" id="li" href="https://www.linkedin.com/in/tanveer-ahmad-472555398/" target="_blank" rel="noopener">Connect on LinkedIn ↗</a>
+  </div>
+  <p class="note reveal">Currently seeking a frontend internship or entry-level role. Note: the images in this portfolio were created or edited with AI tools for this academic project.</p>
+  <a class="top mag reveal" data-cursor="Top" href="#hero">↑ Back to top</a>
+  <div class="copy">© 2026 TANVEER AHMAD</div>
+</footer>
+
+<!-- ================= LIGHTBOX ================= -->
+<div id="lb"><img alt=""><button class="lb-btn" id="lbClose" aria-label="Close">✕</button><button class="lb-btn" id="lbPrev" aria-label="Previous">←</button><button class="lb-btn" id="lbNext" aria-label="Next">→</button><div id="lbCount"></div></div>
+
+<script>
+(()=>{
+const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>[...c.querySelectorAll(s)];
+const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- split text into animated words ---------- */
+function split(el){
+  let i=0;
+  const walk=node=>[...node.childNodes].forEach(n=>{
+    if(n.nodeType===3){
+      const frag=document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach(part=>{
+        if(!part)return;
+        if(/^\s+$/.test(part)){frag.appendChild(document.createTextNode(' '));return;}
+        const w=document.createElement('span');w.className='w';
+        const wi=document.createElement('span');wi.className='wi';wi.textContent=part;
+        wi.style.transitionDelay=(i++*70)+'ms';
+        w.appendChild(wi);frag.appendChild(w);
+      });
+      n.replaceWith(frag);
+    } else if(n.nodeType===1) walk(n);
+  });
+  walk(el);
+}
+$$('[data-split]').forEach(split);
+
+/* ---------- marquees ---------- */
+const MQ={sk:['React','JavaScript','Node.js','MongoDB','Express','Tailwind','Git','UI Design'],oc:['Openness','Conscientiousness','Extraversion','Agreeableness','Emotional Stability']};
+$$('.marquee').forEach(m=>{
+  const one=MQ[m.dataset.words].map((w,i)=>`<span class="${i%2?'fill':''}">${w}</span><i>✦</i>`).join('');
+  m.firstElementChild.innerHTML=one+one+one+one;
+});
+
+/* ---------- OCEAN radar + trait cards ---------- */
+const data=[['Openness',90,'s3','03','Curious about new tech, tools and ideas'],
+            ['Conscientiousness',85,'s1','01','Organised, detail-focused and dependable'],
+            ['Extraversion',65,'s6','06','Comfortable presenting and networking'],
+            ['Agreeableness',80,'s2','02','Collaborative, respectful and team-first'],
+            ['Emotional Stability',75,'s5','05','Calm under deadlines and pressure']];
+(function(){
+  const cx=280,cy=210,R=130,n=data.length;
+  const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+r*Math.cos(a),cy+r*Math.sin(a)]};
+  let svg='<svg viewBox="0 0 560 420" role="img" aria-label="OCEAN personality radar chart">';
+  [.25,.5,.75,1].forEach(k=>{svg+=`<polygon class="grid" points="${data.map((_,i)=>pt(i,R*k).join(',')).join(' ')}"/>`});
+  data.forEach((d,i)=>{
+    const [x,y]=pt(i,R);svg+=`<line class="axis" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"/>`;
+    const [lx,ly]=pt(i,R+30);const a=lx<cx-5?'end':lx>cx+5?'start':'middle';
+    svg+=`<text x="${lx}" y="${ly}" text-anchor="${a}" dominant-baseline="middle">${d[0]}</text>`;
+  });
+  const pts=data.map((d,i)=>pt(i,R*d[1]/100));
+  svg+=`<g class="poly"><polygon points="${pts.map(p=>p.join(',')).join(' ')}"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="5"/>`).join('')}</g></svg>`;
+  $('#radar').innerHTML=svg;
+  $('#traits').innerHTML=data.map((d,i)=>`<a class="trait reveal" style="--d:${i*90}ms;--w:${d[1]}%" href="#${d[2]}" data-cursor="Open"><div class="t-top"><h3>${d[0]}</h3><span class="pct" data-count="${d[1]}">0%</span></div><p>${d[4]}</p><div class="track2"><div class="fill" data-w="${d[1]}"></div></div><small>See Image ${d[3]} →</small></a>`).join('');
+})();
+
+/* ---------- recap grid ---------- */
+const frames=$$('.shot .frame');
+$('#recapGrid').innerHTML=frames.map((f,i)=>`<button class="thumb reveal" style="--d:${i*80}ms" data-i="${i}" data-cursor="View"><img src="${f.dataset.src}" alt="Image ${i+1}" loading="lazy"><span>0${i+1}</span></button>`).join('');
+
+/* ---------- missing image fallbacks ---------- */
+function watch(img,target){
+  img.addEventListener('error',()=>target.classList.add('missing'));
+  if(img.complete&&img.naturalWidth===0)target.classList.add('missing');
+}
+frames.forEach(f=>watch($('img',f),f));
+$$('.thumb').forEach(t=>watch($('img',t),t));
+
+/* ---------- reveal observer ---------- */
+function countUp(el){
+  const to=+el.dataset.count,t0=performance.now(),d=1400;
+  (function f(t){const p=Math.min(1,(t-t0)/d);el.textContent=Math.round(to*(1-Math.pow(1-p,3)))+'%';if(p<1)requestAnimationFrame(f)})(t0);
+}
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;
+  const el=e.target;el.classList.add('in');
+  const fr=el.querySelector&&el.querySelector('.frame');if(fr)fr.classList.add('in');
+  $$('[data-count]',el).forEach(countUp);
+  $$('[data-w]',el).forEach(f=>f.style.width=f.dataset.w+'%');
+  if(el.classList.contains('reveal'))setTimeout(()=>el.style.removeProperty('--d'),1600);
+  io.unobserve(el);
+}),{threshold:.18,rootMargin:'0px 0px -6% 0px'});
+$$('.reveal,[data-split],.radar').forEach(el=>{if(!el.hasAttribute('data-hero'))io.observe(el)});
+/* frames start fully clipped (clip-path), so observe their wrapper instead */
+frames.forEach(f=>io.observe(f.parentElement));
+
+/* ---------- section theme / dots / HUD ---------- */
+const secs=$$('[data-theme]'),dotsBox=$('#dots'),hud=$('#hud'),hudNum=$('#hudNum'),hudTrait=$('#hudTrait');
+secs.forEach(s=>{
+  const b=document.createElement('button');b.dataset.label=s.dataset.label;b.setAttribute('aria-label',s.dataset.label);
+  b.addEventListener('click',()=>s.scrollIntoView({behavior:'smooth'}));dotsBox.appendChild(b);
+});
+const dots=$$('button',dotsBox);
+const so=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;
+  const s=e.target,i=secs.indexOf(s);
+  document.documentElement.style.setProperty('--accent',s.dataset.theme);
+  dots.forEach((d,j)=>d.classList.toggle('on',i===j));
+  const shot=s.classList.contains('shot');
+  hud.classList.toggle('show',shot);
+  if(shot){hudNum.textContent=s.dataset.idx;hudTrait.textContent=s.dataset.trait;}
+}),{rootMargin:'-45% 0px -45% 0px'});
+secs.forEach(s=>so.observe(s));
+
+/* ---------- typing role ---------- */
+const roles=['Frontend Developer','React & MERN Builder','UI-Minded Problem Solver','Remote-Ready Teammate'];
+let ri=0,ci=0,del=false,typing=false;const roleEl=$('#role');
+function type(){
+  const w=roles[ri];roleEl.textContent=w.slice(0,ci);
+  if(!del&&ci<w.length){ci++;setTimeout(type,70)}
+  else if(!del){del=true;setTimeout(type,1400)}
+  else if(ci>0){ci--;setTimeout(type,35)}
+  else{del=false;ri=(ri+1)%roles.length;setTimeout(type,300)}
+}
+
+/* ---------- loader ---------- */
+const loader=$('#loader'),cnt=$('#ldCount'),bar=$('#ldBar');
+const dur=reduce?200:1500,t0=performance.now();
+function finish(){
+  loader.classList.add('done');document.body.classList.add('ready');
+  $$('[data-hero]').forEach(e=>e.classList.add('in'));
+  if(!typing){typing=true;setTimeout(type,900)}
+  setTimeout(()=>loader.remove(),1300);
+}
+(function tick(t){
+  const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);
+  cnt.textContent=Math.round(e*100);bar.style.transform='scaleX('+e+')';
+  if(p<1)requestAnimationFrame(tick);else finish();
+})(t0);
+
+/* ---------- scroll-driven effects ---------- */
+const prog=$('#progress'),heroC=$('#heroContent'),nums=$$('[data-speed]'),marqs=$$('.marquee');
+let mw=[],ticking=false;
+const measure=()=>{mw=marqs.map(m=>m.firstElementChild.scrollWidth/2)};
+function update(){
+  ticking=false;
+  const y=scrollY,vh=innerHeight,H=Math.max(1,document.documentElement.scrollHeight-vh);
+  prog.style.transform=`scaleX(${Math.min(1,y/H)})`;
+  if(y<vh*1.2){heroC.style.transform=`translate3d(0,${y*.25}px,0)`;heroC.style.opacity=Math.max(0,1-y/(vh*.8))}
+  if(reduce)return;
+  frames.forEach(f=>{
+    const r=f.getBoundingClientRect();if(r.bottom<-80||r.top>vh+80)return;
+    f.style.setProperty('--py',(-(r.top+r.height/2-vh/2)/vh*5).toFixed(2)+'%');
+  });
+  nums.forEach(n=>{
+    const r=n.parentElement.getBoundingClientRect();if(r.bottom<0||r.top>vh)return;
+    n.style.transform=`translate3d(0,${((r.top+r.height/2-vh/2)*n.dataset.speed).toFixed(1)}px,0)`;
+  });
+  marqs.forEach((m,i)=>{
+    const w=mw[i]||1,s=(y*.35)%w;
+    m.firstElementChild.style.transform=`translate3d(${m.dataset.dir>0?-s:s-w}px,0,0)`;
+  });
+}
+addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(update)}},{passive:true});
+addEventListener('resize',()=>{measure();update()});
+addEventListener('load',()=>{measure();update()});
+measure();update();
+
+/* ---------- desktop-only: cursor, tilt, hero parallax, magnetic buttons ---------- */
+if(fine){
+  document.body.classList.add('has-cursor');
+  const dot=$('.cursor-dot'),ring=$('.cursor-ring');
+  let x=innerWidth/2,y=innerHeight/2,rx=x,ry=y;
+  addEventListener('mousemove',e=>{x=e.clientX;y=e.clientY;dot.style.transform=`translate3d(${x}px,${y}px,0)`});
+  (function loop(){rx+=(x-rx)*.16;ry+=(y-ry)*.16;ring.style.transform=`translate3d(${rx}px,${ry}px,0)`;requestAnimationFrame(loop)})();
+  document.addEventListener('mouseover',e=>{
+    const t=e.target.closest('[data-cursor],a,button');
+    ring.classList.toggle('big',!!t);
+    const lab=t&&t.dataset.cursor;ring.classList.toggle('label',!!lab);ring.textContent=lab||'';
+  });
+  if(!reduce){
+    frames.forEach(f=>{
+      const wrap=f.parentElement;
+      f.addEventListener('mousemove',e=>{
+        const r=wrap.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;
+        f.style.setProperty('--ry',((px-.5)*10).toFixed(2)+'deg');
+        f.style.setProperty('--rx',((.5-py)*10).toFixed(2)+'deg');
+        f.style.setProperty('--mx',(px*100)+'%');f.style.setProperty('--my',(py*100)+'%');
+      });
+      f.addEventListener('mouseleave',()=>{f.style.setProperty('--rx','0deg');f.style.setProperty('--ry','0deg')});
+    });
+    const hero=$('#hero');
+    addEventListener('mousemove',e=>{
+      hero.style.setProperty('--hx',(e.clientX/innerWidth-.5).toFixed(3));
+      hero.style.setProperty('--hy',(e.clientY/innerHeight-.5).toFixed(3));
+    });
+    const mags=$$('.mag');
+    addEventListener('mousemove',e=>mags.forEach(m=>{
+      const r=m.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+      m.style.transform=Math.hypot(dx,dy)<110?`translate(${dx*.25}px,${dy*.25}px)`:'';
+    }));
+  }
+}
+
+/* ---------- lightbox ---------- */
+const lb=$('#lb'),lbImg=$('img',lb),lbCount=$('#lbCount');let list=[],cur=0;
+function show(){lbImg.src=list[cur];lbCount.textContent=(cur+1)+' / '+list.length}
+function openLb(i){
+  list=frames.filter(f=>!f.classList.contains('missing')).map(f=>f.dataset.src);
+  cur=list.indexOf(frames[i].dataset.src);if(cur<0)return;
+  show();lb.classList.add('on');document.body.style.overflow='hidden';
+}
+function closeLb(){lb.classList.remove('on');document.body.style.overflow=''}
+function step(d){cur=(cur+d+list.length)%list.length;show()}
+frames.forEach((f,i)=>f.addEventListener('click',()=>{if(!f.classList.contains('missing'))openLb(i)}));
+$$('.thumb').forEach(t=>t.addEventListener('click',()=>{if(!t.classList.contains('missing'))openLb(+t.dataset.i)}));
+lb.addEventListener('click',closeLb);
+$('#lbClose').addEventListener('click',e=>{e.stopPropagation();closeLb()});
+$('#lbPrev').addEventListener('click',e=>{e.stopPropagation();step(-1)});
+$('#lbNext').addEventListener('click',e=>{e.stopPropagation();step(1)});
+lbImg.addEventListener('click',e=>e.stopPropagation());
+addEventListener('keydown',e=>{
+  if(!lb.classList.contains('on'))return;
+  if(e.key==='Escape')closeLb();if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1);
+});
+})();
+</script>
+</body>
+</html>
